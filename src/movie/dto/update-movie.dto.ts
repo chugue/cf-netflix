@@ -1,12 +1,16 @@
 import {
+  ArrayNotEmpty,
   Equals,
+  IsArray,
   IsBoolean,
   IsDefined,
   IsEmpty,
   IsEnum,
   IsIn,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
+  IsString,
   NotEquals,
   registerDecorator,
   Validate,
@@ -51,13 +55,22 @@ function IsPasswordValid(validationOptions?: ValidationOptions) {
 export class UpdateMovieDto {
   @IsNotEmpty()
   @IsOptional()
+  @IsString()
   title?: string;
 
   @IsNotEmpty()
   @IsOptional()
-  genre?: string;
+  @IsString()
+  detail?: string;
 
   @IsNotEmpty()
   @IsOptional()
-  detail?: string;
+  @IsNumber({}, { each: true })
+  directorId?: number;
+
+  @IsNumber({}, { each: true })
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  genreIds?: number[];
 }
