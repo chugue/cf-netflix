@@ -1,29 +1,12 @@
+import { PartialType } from '@nestjs/mapped-types';
 import {
-  ArrayNotEmpty,
-  Equals,
-  IsArray,
-  IsBoolean,
-  IsDefined,
-  IsEmpty,
-  IsEnum,
-  IsIn,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  NotEquals,
   registerDecorator,
-  Validate,
   ValidationArguments,
   ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-
-enum MovieGenre {
-  ACTION = 'action',
-  FANTASY = 'fantasy',
-}
+import { CreateMovieDto } from './create-movie.dto';
 
 @ValidatorConstraint({
   async: true,
@@ -52,25 +35,4 @@ function IsPasswordValid(validationOptions?: ValidationOptions) {
   };
 }
 
-export class UpdateMovieDto {
-  @IsNotEmpty()
-  @IsOptional()
-  @IsString()
-  title?: string;
-
-  @IsNotEmpty()
-  @IsOptional()
-  @IsString()
-  detail?: string;
-
-  @IsNotEmpty()
-  @IsOptional()
-  @IsNumber({}, { each: true })
-  directorId?: number;
-
-  @IsNumber({}, { each: true })
-  @IsOptional()
-  @IsArray()
-  @ArrayNotEmpty()
-  genreIds?: number[];
-}
+export class UpdateMovieDto extends PartialType(CreateMovieDto) {}

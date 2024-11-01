@@ -10,21 +10,18 @@ import {
 export class CreateMovieDto {
   @IsNotEmpty()
   @IsString()
-  @IsOptional()
-  title?: string;
+  title: string;
 
   @IsNotEmpty()
   @IsString()
-  @IsOptional()
-  detail?: string;
+  detail: string;
 
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
-  directorId?: number;
+  directorId: number;
 
   @ArrayNotEmpty()
   @IsNumber({}, { each: true })
   @IsArray()
-  genreIds?: number[];
+  genreIds: number[];
 }

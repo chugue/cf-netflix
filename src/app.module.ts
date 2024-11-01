@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { MovieModule } from './movie/movie.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -9,6 +14,13 @@ import { DirectorModule } from './director/director.module';
 import { Director } from './director/entity/director.entity';
 import { GenreModule } from './genre/genre.module';
 import { Genre } from './genre/entities/genre.entity';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { envKeys } from './common/const/env.const';
+import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/guard/auth.guard';
 
 @Module({
   imports: [
@@ -22,24 +34,51 @@ import { Genre } from './genre/entities/genre.entity';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
+        HASH_ROUNDS: Joi.number().required(),
+        ACCESS_TOKEN_SECRET: Joi.string().required(),
+        REFRESH_TOKEN_SECRET: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: configService.get<string>('DB_TYPE') as 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT'),
-        username: configService.get<string>('DB_USERNAME'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_DATABASE'),
-        entities: [Movie, MovieDetail, Director, Genre],
+        type: configService.get<string>(envKeys.DB_TYPE) as 'postgres',
+        host: configService.get<string>(envKeys.DB_HOST),
+        port: configService.get<number>(envKeys.DB_PORT),
+        username: configService.get<string>(envKeys.DB_USERNAME),
+        password: configService.get<string>(envKeys.DB_PASSWORD),
+        database: configService.get<string>(envKeys.DB_DATABASE),
+        entities: [Movie, MovieDetail, Director, Genre, User],
         synchronize: true,
       }),
     }),
     MovieModule,
     DirectorModule,
     GenreModule,
+    AuthModule,
+    UserModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(BearerTokenMiddleware)
+      .exclude(
+        {
+          path: 'auth/register',
+          method: RequestMethod.POST,
+        },
+        {
+          path: 'auth/login',
+          method: RequestMethod.POST,
+        },
+      )
+      .forRoutes('*');
+  }
+}
