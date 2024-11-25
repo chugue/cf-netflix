@@ -19,9 +19,11 @@ import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
 import { envKeys } from './common/const/env.const';
 import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { RBACGuard } from './auth/guard/rbac.guard';
+import { CommonModule } from './common/common.module';
+import { ResponseTimeInterceptor } from './common/interceptor/response-time.interceptor';
 
 @Module({
   imports: [
@@ -58,6 +60,7 @@ import { RBACGuard } from './auth/guard/rbac.guard';
     GenreModule,
     AuthModule,
     UserModule,
+    CommonModule,
   ],
   providers: [
     {
@@ -67,6 +70,10 @@ import { RBACGuard } from './auth/guard/rbac.guard';
     {
       provide: APP_GUARD,
       useClass: RBACGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseTimeInterceptor,
     },
   ],
 })

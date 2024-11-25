@@ -1,4 +1,10 @@
-import { IsDateString, IsNotEmpty, IsString, isString } from 'class-validator';
+import {
+  IsDate,
+  IsDateString,
+  IsNotEmpty,
+  IsString,
+  isString,
+} from 'class-validator';
 import { Column } from 'typeorm';
 
 export class CreateDirectorDto {
@@ -6,7 +12,7 @@ export class CreateDirectorDto {
   @IsString()
   name: string;
 
-  @IsDateString()
+  @IsDate()
   @IsNotEmpty()
   dob: Date;
 
