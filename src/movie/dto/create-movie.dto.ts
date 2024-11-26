@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -21,7 +22,8 @@ export class CreateMovieDto {
   directorId: number;
 
   @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
   @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
   genreIds: number[];
 }
