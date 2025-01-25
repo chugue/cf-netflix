@@ -1,53 +1,72 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-  VersionColumn,
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+    VersionColumn,
 } from 'typeorm';
 import { BaseTable } from '../../common/entity/base-table.entity';
 import { MovieDetail } from './movie-detail.entity';
 import { Director } from 'src/director/entity/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
+import { MovieFilePipe } from '../pipe/movie-file.pipe';
+import { User } from 'src/user/entities/user.entity';
+import { MovieUserLike } from './movie-user-like.entity';
 
 @Entity()
 export class Movie extends BaseTable {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @Column({
-    unique: true,
-  })
-  title: string;
+    @ManyToOne(() => User, (user) => user.createdMovies, {
+        cascade: true,
+        nullable: true,
+    })
+    creator: User;
 
-  @ManyToMany(() => Genre, (genre) => genre.movies)
-  @JoinTable()
-  genres: Genre[];
+    @Column({
+        unique: true,
+    })
+    title: string;
 
-  @Column({
-    default: 0,
-  })
-  likeCount: number;
+    @ManyToMany(() => Genre, (genre) => genre.movies)
+    @JoinTable()
+    genres: Genre[];
 
-  @OneToOne(() => MovieDetail, (movieDetail) => movieDetail.id, {
-    cascade: true,
-  })
-  @JoinColumn()
-  detail: MovieDetail;
+    @Column({
+        default: 0,
+    })
+    likeCount: number;
 
-  @Column()
-  movieFilePath: string;
+    @Column({
+        default: 0,
+    })
+    dislikeCount: number;
 
-  @ManyToOne(() => Director, (director) => director.id, {
-    cascade: true,
-    nullable: false,
-  })
-  director: Director;
+    @OneToOne(() => MovieDetail, (movieDetail) => movieDetail.id, {
+        cascade: true,
+    })
+    @JoinColumn()
+    detail: MovieDetail;
+
+    @Column()
+    @Transform(({ value }) => `http://localhost:3000/${value}`)
+    movieFilePath: string;
+
+    @ManyToOne(() => Director, (director) => director.id, {
+        cascade: true,
+        nullable: false,
+    })
+    director: Director;
+
+    @OneToMany(() => MovieUserLike, (movieUserLike) => movieUserLike.movie)
+    likedUsers: MovieUserLike[];
 }

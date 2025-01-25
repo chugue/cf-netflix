@@ -1,20 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  UseInterceptors,
-  ClassSerializerInterceptor,
-  ParseIntPipe,
-  Request,
-  Req,
-  UploadedFile,
-  UploadedFiles,
-  BadRequestException,
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Query,
+    UseInterceptors,
+    ClassSerializerInterceptor,
+    ParseIntPipe,
+    Request,
+    Req,
+    UploadedFile,
+    UploadedFiles,
+    BadRequestException,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -26,75 +26,120 @@ import { GetMoviesDto } from './dto/get-movies.dto';
 import { CacheInterceptor } from 'src/common/interceptor/cache.interceptor';
 import { TransactionInterceptor } from 'src/common/interceptor/transasction.interceptor';
 import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-  FilesInterceptor,
+    FileFieldsInterceptor,
+    FileInterceptor,
+    FilesInterceptor,
 } from '@nestjs/platform-express';
 import { MovieFilePipe } from './pipe/movie-file.pipe';
+import { UserId } from 'src/user/decorator/user-id.decorator';
+import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+import { QueryRunner as QR } from 'typeorm';
+import {
+    CacheKey,
+    CacheTTL,
+    CacheInterceptor as CI,
+} from '@nestjs/cache-manager';
+import { Throttle } from 'src/common/decorator/throttle.decorator';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
-  constructor(private readonly movieService: MovieService) {}
+    constructor(private readonly movieService: MovieService) {}
 
-  @Get()
-  @Public()
-  @UseInterceptors(CacheInterceptor)
-  getMovies(@Query() dto: GetMoviesDto) {
-    return this.movieService.findAll(dto);
-  }
+    @Get()
+    @Public()
+    @Throttle({
+        count: 5,
+        unit: 'minute',
+    })
+    @UseInterceptors(CacheInterceptor)
+    getMovies(@Query() dto: GetMoviesDto, @UserId() userId?: number) {
+        return this.movieService.findAll(dto, userId);
+    }
 
-  @Get(':id')
-  @Public()
-  getMovie(
-    @Param('id', ParseIntPipe)
-    id: number,
-  ) {
-    return this.movieService.findOne(id);
-  }
+    // /movie/recent
+    @Get('recent')
+    @UseInterceptors(CI)
+    @CacheKey('getMoviesRecent')
+    @CacheTTL(10000)
+    getMoviesRecent() {
+        return this.movieService.findRecent();
+    }
 
-  @Post()
-  @RBAC(Role.ADMIN)
-  @UseInterceptors(TransactionInterceptor)
-  @UseInterceptors(
-    FileInterceptor('movie', {
-      limits: {
-        fileSize: 20000000,
-      },
-      fileFilter: (req, file, callback) => {
-        if (file.mimetype !== 'video/mp4') {
-          return callback(
-            new BadRequestException('MP4 타입만 업로드 가능합니다.'),
-            false,
-          );
-        }
-        return callback(null, true);
-      },
-    }),
-  )
-  postMovie(
-    @Body() reqDTO: CreateMovieDto,
-    @Req() req,
-    @UploadedFile()
-    movie: Express.Multer.File,
-  ) {
-    console.log('---------------------');
-    console.log(movie);
-    return this.movieService.create(reqDTO, req.queryRunner);
-  }
+    // /movie/alksdjflk
+    @Get(':id')
+    @Public()
+    getMovie(
+        @Param('id', ParseIntPipe)
+        id: number,
+    ) {
+        return this.movieService.findOne(id);
+    }
 
-  @Patch(':id')
-  @RBAC(Role.ADMIN)
-  updateMovie(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() reqDTO: UpdateMovieDto,
-  ) {
-    return this.movieService.update(id, reqDTO);
-  }
+    @Post()
+    @RBAC(Role.ADMIN)
+    @UseInterceptors(TransactionInterceptor)
+    postMovie(
+        @Body() reqDTO: CreateMovieDto,
+        @QueryRunner() queryRunner: QR,
+        @UserId() userId: number,
+    ) {
+        return this.movieService.create(reqDTO, queryRunner, userId);
+    }
 
-  @Delete(':id')
-  @RBAC(Role.ADMIN)
-  deleteMovie(@Param('id') id: number) {
-    return this.movieService.remove(id);
-  }
+    @Patch(':id')
+    @RBAC(Role.ADMIN)
+    updateMovie(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() reqDTO: UpdateMovieDto,
+    ) {
+        return this.movieService.update(id, reqDTO);
+    }
+
+    @Delete(':id')
+    @RBAC(Role.ADMIN)
+    deleteMovie(@Param('id') id: number) {
+        return this.movieService.remove(id);
+    }
+
+    /**
+     * [Like] [Dislike]
+     *
+     * 아무것도 누르지 않은 상태
+     * Like & Dislike 모두 버튼 꺼져있음
+     *
+     * Like 버튼 누르면
+     * Like 버튼 불 켜짐
+     *
+     * Like 버튼 다시 누르면
+     * Like 버튼 불 꺼짐
+     *
+     * Dislike 버튼 누르면
+     * Dislike 버튼 불 켜짐
+     *
+     * Dislike 버튼 다시 누르면
+     * Dislike 버튼 불 꺼짐
+     *
+     * Like 버튼 누름
+     * Like 버튼 불 켜짐
+     *
+     * Dislike 버튼 누름
+     * Like 버튼 불 꺼지고 Dislike 버튼 불 켜짐
+     */
+
+    @Post(':id/like')
+    createMovieLike(
+        @Param('id', ParseIntPipe) movieId: number,
+        @UserId() userId: number,
+    ) {
+        return this.movieService.toggleMovieLike(movieId, userId, true);
+    }
+
+    @Post(':id/dislike')
+    createMovieDislike(
+        @Param('id', ParseIntPipe) movieId: number,
+        @UserId() userId: number,
+    ) {
+        return this.movieService.toggleMovieLike(movieId, userId, false);
+    }
 }
