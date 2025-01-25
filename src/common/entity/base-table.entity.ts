@@ -1,22 +1,26 @@
+import { ApiHideProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import {
-  CreateDateColumn,
-  Entity,
-  UpdateDateColumn,
-  VersionColumn,
+    CreateDateColumn,
+    Entity,
+    UpdateDateColumn,
+    VersionColumn,
 } from 'typeorm';
 
 @Entity()
 export class BaseTable {
-  @CreateDateColumn()
-  @Exclude()
-  createdAt: Date;
+    @CreateDateColumn()
+    @Exclude()
+    @ApiHideProperty()
+    createdAt: Date;
 
-  @UpdateDateColumn()
-  @Exclude()
-  updatedAt: Date;
+    @UpdateDateColumn()
+    @ApiHideProperty()
+    @Exclude()
+    updatedAt: Date;
 
-  @Exclude()
-  @VersionColumn()
-  version: number;
+    @Exclude()
+    @ApiHideProperty()
+    @VersionColumn()
+    version: number;
 }
