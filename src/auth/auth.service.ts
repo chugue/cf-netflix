@@ -13,12 +13,14 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { envKeys } from 'src/common/const/env.const';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
         private readonly configService: ConfigService,
+        private readonly userService: UserService,
         private readonly jwtService: JwtService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
@@ -57,24 +59,10 @@ export class AuthService {
     // rawToken -> Basic $token
     async registerUser(rawToken: string) {
         const { email, password } = await this.parseBasicToken(rawToken);
-
-        const user = await this.userRepository.findOne({ where: { email } });
-
-        if (user) {
-            throw new BadRequestException('이미 존재하는 이메일입니다.');
-        }
-
-        const hashedPassword = await bcrypt.hash(
-            password,
-            this.configService.get<number>(envKeys.HASH_ROUNDS),
-        );
-
-        await this.userRepository.save({
+        return this.userService.create({
             email,
-            password: hashedPassword,
+            password,
         });
-
-        return this.userRepository.findOne({ where: { email } });
     }
 
     /////////////////////////// 내부 기능 메소드 ///////////////////////////
@@ -162,7 +150,7 @@ export class AuthService {
         const passOk = await bcrypt.compare(password, user.password);
 
         if (!passOk) {
-            throw new NotFoundException('잘못된 로그인 정보입니다.');
+            throw new BadRequestException('잘못된 로그인 정보입니다.');
         }
 
         return user;

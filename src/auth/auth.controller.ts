@@ -55,9 +55,9 @@ export class AuthController {
         };
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Get('private')
-    getPrivate(@Request() req) {
-        return req.user;
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Get('private')
+    // getPrivate(@Request() req) {
+    //     return req.user;
+    // }
 }

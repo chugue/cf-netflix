@@ -9,18 +9,18 @@ import {
 
 @Entity()
 export class BaseTable {
-    @CreateDateColumn()
     @Exclude()
+    @CreateDateColumn()
     @ApiHideProperty()
     createdAt: Date;
 
+    @Exclude()
     @UpdateDateColumn()
     @ApiHideProperty()
-    @Exclude()
     updatedAt: Date;
 
     @Exclude()
-    @ApiHideProperty()
     @VersionColumn()
+    @ApiHideProperty()
     version: number;
 }
