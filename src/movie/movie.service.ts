@@ -311,7 +311,7 @@ export class MovieService {
         return this.movieRepository
             .createQueryBuilder('movie')
             .leftJoinAndSelect('movie.director', 'director')
-            .leftJoinAndSelect('movie.genre', 'genre');
+            .leftJoinAndSelect('movie.genres', 'genres');
     }
 
     /* istanbul ignore next */

@@ -1,16 +1,6 @@
-import {
-    Body,
-    Controller,
-    Post,
-    Headers,
-    UseGuards,
-    Request,
-    Get,
-} from '@nestjs/common';
+import { Body, Controller, Post, Headers, UseGuards, Request, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './strategy/local.strategy';
-import { JwtAuthGuard } from './strategy/jwt.strategy';
 import { Public } from './decorator/public.decorator';
 import { ApiBasicAuth, ApiBearerAuth } from '@nestjs/swagger';
 import { Authorization } from './decorator/authorization.decorator';

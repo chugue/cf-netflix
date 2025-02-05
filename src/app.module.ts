@@ -1,9 +1,4 @@
-import {
-    MiddlewareConsumer,
-    Module,
-    NestModule,
-    RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { MovieModule } from './movie/movie.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -61,14 +56,7 @@ import * as winston from 'winston';
                 username: configService.get<string>(envKeys.DB_USERNAME),
                 password: configService.get<string>(envKeys.DB_PASSWORD),
                 database: configService.get<string>(envKeys.DB_DATABASE),
-                entities: [
-                    Movie,
-                    MovieDetail,
-                    Director,
-                    Genre,
-                    User,
-                    MovieUserLike,
-                ],
+                entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike],
                 synchronize: true,
             }),
         }),

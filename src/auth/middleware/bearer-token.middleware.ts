@@ -30,9 +30,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
         }
         const token = this.validateBearerToken(authHeader);
 
-        const blockedToken = await this.cacheManager.get(
-            `BLOCK_TOKEN_${token}`,
-        );
+        const blockedToken = await this.cacheManager.get(`BLOCK_TOKEN_${token}`);
 
         if (blockedToken) {
             throw new UnauthorizedException('차단된 토큰입니다.');
@@ -49,10 +47,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
 
         const decodedPayload = this.jwtService.decode(token);
 
-        if (
-            decodedPayload.type !== 'refresh' &&
-            decodedPayload.type !== 'access'
-        ) {
+        if (decodedPayload.type !== 'refresh' && decodedPayload.type !== 'access') {
             throw new UnauthorizedException('토큰 포맷이 잘못되었습니다.');
         }
 
@@ -63,7 +58,7 @@ export class BearerTokenMiddleware implements NestMiddleware {
                     : envKeys.ACCESS_TOKEN_SECRET;
 
             const payload = await this.jwtService.verifyAsync(token, {
-                secret: this.configService.get<string>(secretKey),
+                secret: secretKey,
             });
 
             // payload['exp'] -> epoch time seconds
