@@ -8,7 +8,7 @@ import { UserService } from 'src/user/user.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { NotFoundError } from 'rxjs';
 
 const mockUserRepository = {
