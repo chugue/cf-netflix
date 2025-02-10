@@ -7,43 +7,31 @@ import { MovieDetail } from './entity/movie-detail.entity';
 import { Director } from 'src/director/entity/director.entity';
 import { Genre } from 'src/genre/entities/genre.entity';
 import { CommonModule } from 'src/common/common.module';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { User } from 'src/user/entities/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
-import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Movie,
-      MovieDetail,
-      Director,
-      Genre,
-      MovieUserLike,
-      User,
-    ]),
-    CommonModule,
+    imports: [
+        TypeOrmModule.forFeature([Movie, MovieDetail, Director, Genre, MovieUserLike, User]),
+        CommonModule,
 
-    // MulterModule.register({
-    //   storage: diskStorage({
-    //     // ......./NETFLIX/public/movie
-    //     destination: join(process.cwd(), 'public', 'movie'),
-    //     filename: (req, file, callback) => {
-    //       const split = file.originalname.split('.');
-    //       let extension = 'mp4';
+        // MulterModule.register({
+        //   storage: diskStorage({
+        //     // ......./NETFLIX/public/movie
+        //     destination: join(process.cwd(), 'public', 'movie'),
+        //     filename: (req, file, callback) => {
+        //       const split = file.originalname.split('.');
+        //       let extension = 'mp4';
 
-    //       if (split.length > 1) {
-    //         extension = split[split.length - 1];
-    //       }
-    //       callback(null, `${uuidv4()}_${Date.now()}.${extension}`);
-    //     },
-    //   }),
-    // }),
-  ],
-  controllers: [MovieController],
-  providers: [MovieService],
+        //       if (split.length > 1) {
+        //         extension = split[split.length - 1];
+        //       }
+        //       callback(null, `${uuidv4()}_${Date.now()}.${extension}`);
+        //     },
+        //   }),
+        // }),
+    ],
+    controllers: [MovieController],
+    providers: [MovieService],
 })
 export class MovieModule {}

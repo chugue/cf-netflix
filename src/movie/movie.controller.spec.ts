@@ -64,7 +64,7 @@ describe('MovieController', () => {
                 userId,
             );
 
-            expect(movieService.create).toHaveBeenCalledWith(body, queryRunner, userId);
+            expect(movieService.create).toHaveBeenCalledWith(body, userId, queryRunner);
         });
     });
 

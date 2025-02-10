@@ -7,12 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {
-    BadRequestException,
-    NotFoundException,
-    UnauthorizedException,
-} from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { NotFoundError } from 'rxjs';
 
 const mockUserRepository = {
@@ -111,9 +107,7 @@ describe('AuthService', () => {
         it('should parse a valid Basic token', async () => {
             const email = 'test@example.com';
             const password = '123456';
-            const base64 = Buffer.from(`${email}:${password}`).toString(
-                'base64',
-            );
+            const base64 = Buffer.from(`${email}:${password}`).toString('base64');
             const rawToken = `Basic ${base64}`;
 
             const result = await authService.parseBasicToken(rawToken);
@@ -123,23 +117,17 @@ describe('AuthService', () => {
 
         it('should throw an error for invalid token format', () => {
             const rawToken = 'InvalidTokenFormat';
-            expect(authService.parseBasicToken(rawToken)).rejects.toThrow(
-                BadRequestException,
-            );
+            expect(authService.parseBasicToken(rawToken)).rejects.toThrow(BadRequestException);
         });
 
         it('should throw an error for invalid Basic token format', () => {
             const rawToken = 'Bearer InvalidTokenFormat';
-            expect(authService.parseBasicToken(rawToken)).rejects.toThrow(
-                BadRequestException,
-            );
+            expect(authService.parseBasicToken(rawToken)).rejects.toThrow(BadRequestException);
         });
 
         it('should throw an error for invalid Basic token format', () => {
             const rawToken = 'Basic a';
-            expect(authService.parseBasicToken(rawToken)).rejects.toThrow(
-                BadRequestException,
-            );
+            expect(authService.parseBasicToken(rawToken)).rejects.toThrow(BadRequestException);
         });
     });
 
@@ -159,16 +147,16 @@ describe('AuthService', () => {
 
         it('shoud throw an BadRequestException for invalid Bearer token format', () => {
             const rawToken = 'a';
-            expect(
-                authService.parseBearerToken(rawToken, false),
-            ).rejects.toThrow(BadRequestException);
+            expect(authService.parseBearerToken(rawToken, false)).rejects.toThrow(
+                BadRequestException,
+            );
         });
 
         it('should throw an BadRequestException for token not starting with Bearer', () => {
             const rawToken = 'Basic a';
-            expect(
-                authService.parseBearerToken(rawToken, false),
-            ).rejects.toThrow(BadRequestException);
+            expect(authService.parseBearerToken(rawToken, false)).rejects.toThrow(
+                BadRequestException,
+            );
         });
 
         it('should throw an BadRequestException if payload.type is not refresh but isRefreshToken is true', () => {
@@ -177,9 +165,9 @@ describe('AuthService', () => {
                 type: 'refresh',
             });
 
-            expect(
-                authService.parseBearerToken(rawToken, false),
-            ).rejects.toThrow(UnauthorizedException);
+            expect(authService.parseBearerToken(rawToken, false)).rejects.toThrow(
+                UnauthorizedException,
+            );
         });
 
         it('should throw an BadRequestException if payload.type is not refresh but isRefreshToken is true', () => {
@@ -188,9 +176,9 @@ describe('AuthService', () => {
                 type: 'access',
             });
 
-            expect(
-                authService.parseBearerToken(rawToken, true),
-            ).rejects.toThrow(UnauthorizedException);
+            expect(authService.parseBearerToken(rawToken, true)).rejects.toThrow(
+                UnauthorizedException,
+            );
         });
     });
 
@@ -229,18 +217,15 @@ describe('AuthService', () => {
             expect(userRepository.findOne).toHaveBeenCalledWith({
                 where: { email },
             });
-            expect(bcrypt.compare).toHaveBeenCalledWith(
-                password,
-                hashedPassword,
-            );
+            expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
             expect(result).toEqual(user);
         });
 
         it('should throw an Error for not existing user', () => {
             jest.spyOn(mockUserRepository, 'findOne').mockResolvedValue(null);
-            expect(
-                authService.authenticate('test@example.com', 'password'),
-            ).rejects.toThrow(NotFoundException);
+            expect(authService.authenticate('test@example.com', 'password')).rejects.toThrow(
+                NotFoundException,
+            );
         });
 
         it('should thorw an error for incorrect password', async () => {
@@ -314,19 +299,12 @@ describe('AuthService', () => {
                 email,
                 password,
             });
-            jest.spyOn(authService, 'authenticate').mockResolvedValue(
-                user as User,
-            );
-            jest.spyOn(authService, 'issueToken').mockResolvedValue(
-                'mocked.token',
-            );
+            jest.spyOn(authService, 'authenticate').mockResolvedValue(user as User);
+            jest.spyOn(authService, 'issueToken').mockResolvedValue('mocked.token');
 
             const result = await authService.loginUser(rawToken);
             expect(authService.parseBasicToken).toHaveBeenCalledWith(rawToken);
-            expect(authService.authenticate).toHaveBeenCalledWith(
-                email,
-                password,
-            );
+            expect(authService.authenticate).toHaveBeenCalledWith(email, password);
             expect(authService.issueToken).toHaveBeenCalledTimes(2);
             expect(result).toEqual({
                 refreshToken: 'mocked.token',

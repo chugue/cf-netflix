@@ -159,8 +159,10 @@ describe('MovieService - Integration Test', () => {
             };
 
             const result = await service.findAll(dto);
+
             expect(result.data).toHaveLength(1);
             expect(result.data[0].title).toBe(dto.title);
+            expect(result.data[0]).not.toHaveProperty('likeStatus');
         });
 
         it('should return likeStatus if userId is provided', async () => {
@@ -169,7 +171,130 @@ describe('MovieService - Integration Test', () => {
                 take: 10,
             };
             const result = await service.findAll(dto, users[0].id);
+
+            expect(result.data).toHaveLength(10);
             expect(result.data[0]).toHaveProperty('likeStatus');
+        });
+    });
+
+    describe('create', () => {
+        beforeEach(() => {
+            jest.spyOn(service, 'renameMovieFile').mockResolvedValue();
+        });
+
+        it('should create movie correctly', async () => {
+            const createMovieDto: CreateMovieDto = {
+                title: 'Test Movie',
+                detail: 'A Teset Movie Detail',
+                directorId: directors[0].id,
+                genreIds: genres.map((x) => x.id),
+                movieFileName: 'test.mp4',
+            };
+
+            const result = await service.create(
+                createMovieDto,
+                users[0].id,
+                dataSource.createQueryRunner(),
+            );
+
+            expect(result.title).toBe(createMovieDto.title);
+            expect(result.director.id).toBe(createMovieDto.directorId);
+            expect(result.genres.map((g) => g.id)).toEqual(genres.map((g) => g.id));
+            expect(result.detail.detail).toBe(createMovieDto.detail);
+        });
+    });
+
+    describe('update', () => {
+        it('should update movie correctly', async () => {
+            const movieId = movies[0].id;
+            const updateMovieDto: UpdateMovieDto = {
+                title: 'Changed Title',
+                detail: 'Changed Detail',
+                directorId: directors[1].id,
+                genreIds: [genres[1].id],
+            };
+
+            const result = await service.update(movieId, updateMovieDto);
+
+            expect(result.title).toBe(updateMovieDto.title);
+            expect(result.detail.detail).toBe(updateMovieDto.detail);
+            expect(result.director.id).toBe(updateMovieDto.directorId);
+            expect(result.genres.map((x) => x.id)).toEqual(updateMovieDto.genreIds);
+        });
+
+        it('should throw error if movie does not exist', async () => {
+            const updateMovieDto: UpdateMovieDto = {
+                title: 'Change',
+            };
+            await expect(service.update(9999999, updateMovieDto)).rejects.toThrow(
+                NotFoundException,
+            );
+        });
+    });
+
+    describe('remove', () => {
+        it('should remove movie correctly', async () => {
+            const removeId = movies[0].id;
+            const result = await service.remove(removeId);
+
+            expect(result).toBe(removeId);
+        });
+
+        it('should throw error if movie does not exist', async () => {
+            await expect(service.remove(9999999)).rejects.toThrow(NotFoundException);
+        });
+    });
+
+    describe('toggleMovieLike', () => {
+        it('should create like correctly', async () => {
+            const userId = users[0].id;
+            const movieId = movies[0].id;
+
+            const result = await service.toggleMovieLike(movieId, userId, true);
+
+            expect(result).toEqual({ isLike: true });
+        });
+
+        it('should create dislike correctly', async () => {
+            const userId = users[0].id;
+            const movieId = movies[0].id;
+
+            const result = await service.toggleMovieLike(movieId, userId, false);
+
+            expect(result).toEqual({ isLike: false });
+        });
+
+        it('should toggle like correctly', async () => {
+            const userId = users[0].id;
+            const movieId = movies[0].id;
+
+            await service.toggleMovieLike(movieId, userId, true);
+            const result = await service.toggleMovieLike(movieId, userId, true);
+
+            expect(result.isLike).toBeNull();
+        });
+
+        it('should toggle dislike correctly', async () => {
+            const userId = users[0].id;
+            const movieId = movies[0].id;
+
+            await service.toggleMovieLike(movieId, userId, false);
+            const result = await service.toggleMovieLike(movieId, userId, false);
+
+            expect(result.isLike).toBeNull();
+        });
+    });
+
+    describe('findOne', () => {
+        it('should return movie correctly', async () => {
+            const movieId = movies[0].id;
+            const result = await service.findOne(movieId);
+
+            expect(result.id).toBe(movieId);
+        });
+
+        it('should throw NotFoundException if movie does not exist', async () => {
+            await expect(service.findOne(999999)).rejects.toThrow(NotFoundException);
         });
     });
 });

@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role, User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { envKeys } from 'src/common/const/env.const';
@@ -83,23 +83,17 @@ export class AuthService {
         try {
             const payload = await this.jwtService.verifyAsync(token, {
                 secret: this.configService.get<string>(
-                    isRefreshToken
-                        ? envKeys.REFRESH_TOKEN_SECRET
-                        : envKeys.ACCESS_TOKEN_SECRET,
+                    isRefreshToken ? envKeys.REFRESH_TOKEN_SECRET : envKeys.ACCESS_TOKEN_SECRET,
                 ),
             });
 
             if (isRefreshToken) {
                 if (payload.type !== 'refresh') {
-                    throw new BadRequestException(
-                        'Refresh 토큰을 입력 해주세요',
-                    );
+                    throw new BadRequestException('Refresh 토큰을 입력 해주세요');
                 }
             } else {
                 if (payload.type !== 'access') {
-                    throw new BadRequestException(
-                        'Access 토큰을 입력 해주세요',
-                    );
+                    throw new BadRequestException('Access 토큰을 입력 해주세요');
                 }
             }
 
@@ -156,17 +150,10 @@ export class AuthService {
         return user;
     }
 
-    async issueToken(
-        user: { id: number; role: Role },
-        isRefreshToken: boolean,
-    ) {
-        const refreshTokenSecret = this.configService.get<string>(
-            envKeys.REFRESH_TOKEN_SECRET,
-        );
+    async issueToken(user: { id: number; role: Role }, isRefreshToken: boolean) {
+        const refreshTokenSecret = this.configService.get<string>(envKeys.REFRESH_TOKEN_SECRET);
 
-        const accessTokenSecret = this.configService.get<string>(
-            envKeys.ACCESS_TOKEN_SECRET,
-        );
+        const accessTokenSecret = this.configService.get<string>(envKeys.ACCESS_TOKEN_SECRET);
         return await this.jwtService.signAsync(
             {
                 sub: user.id,

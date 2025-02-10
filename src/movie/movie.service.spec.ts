@@ -321,7 +321,7 @@ describe('MovieService', () => {
             createMovieGenreRelationMock.mockResolvedValue(undefined);
             renameMovieFileMock.mockResolvedValue(undefined);
 
-            const result = await movieService.create(createMovieDto, qr, userId);
+            const result = await movieService.create(createMovieDto, userId, qr);
 
             expect(qr.manager.findOne).toHaveBeenCalledWith(Director, {
                 where: {
@@ -369,7 +369,7 @@ describe('MovieService', () => {
             const userId = 1;
 
             (qr.manager.findOne as any).mockResolvedValueOnce(null);
-            await expect(movieService.create(createMovieDto, qr, userId)).rejects.toThrow(
+            await expect(movieService.create(createMovieDto, userId, qr)).rejects.toThrow(
                 NotFoundException,
             );
 
@@ -400,7 +400,7 @@ describe('MovieService', () => {
                 },
             ]);
 
-            await expect(movieService.create(createMovieDto, qr, userId)).rejects.toThrow(
+            await expect(movieService.create(createMovieDto, userId, qr)).rejects.toThrow(
                 NotFoundException,
             );
 

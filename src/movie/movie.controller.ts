@@ -26,20 +26,12 @@ import { Role } from 'src/user/entities/user.entity';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { CacheInterceptor } from 'src/common/interceptor/cache.interceptor';
 import { TransactionInterceptor } from 'src/common/interceptor/transasction.interceptor';
-import {
-    FileFieldsInterceptor,
-    FileInterceptor,
-    FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { MovieFilePipe } from './pipe/movie-file.pipe';
 import { UserId } from 'src/user/decorator/user-id.decorator';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
 import { QueryRunner as QR } from 'typeorm';
-import {
-    CacheKey,
-    CacheTTL,
-    CacheInterceptor as CI,
-} from '@nestjs/cache-manager';
+import { CacheKey, CacheTTL, CacheInterceptor as CI } from '@nestjs/cache-manager';
 import { Throttle } from 'src/common/decorator/throttle.decorator';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -96,15 +88,12 @@ export class MovieController {
         @QueryRunner() queryRunner: QR,
         @UserId() userId: number,
     ) {
-        return this.movieService.create(reqDTO, queryRunner, userId);
+        return this.movieService.create(reqDTO, userId, queryRunner);
     }
 
     @Patch(':id')
     @RBAC(Role.ADMIN)
-    updateMovie(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() reqDTO: UpdateMovieDto,
-    ) {
+    updateMovie(@Param('id', ParseIntPipe) id: number, @Body() reqDTO: UpdateMovieDto) {
         return this.movieService.update(id, reqDTO);
     }
 
@@ -140,18 +129,12 @@ export class MovieController {
      */
 
     @Post(':id/like')
-    createMovieLike(
-        @Param('id', ParseIntPipe) movieId: number,
-        @UserId() userId: number,
-    ) {
+    createMovieLike(@Param('id', ParseIntPipe) movieId: number, @UserId() userId: number) {
         return this.movieService.toggleMovieLike(movieId, userId, true);
     }
 
     @Post(':id/dislike')
-    createMovieDislike(
-        @Param('id', ParseIntPipe) movieId: number,
-        @UserId() userId: number,
-    ) {
+    createMovieDislike(@Param('id', ParseIntPipe) movieId: number, @UserId() userId: number) {
         return this.movieService.toggleMovieLike(movieId, userId, false);
     }
 }

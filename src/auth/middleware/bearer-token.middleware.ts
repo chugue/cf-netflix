@@ -54,8 +54,8 @@ export class BearerTokenMiddleware implements NestMiddleware {
         try {
             const secretKey =
                 decodedPayload.type === 'refresh'
-                    ? envKeys.REFRESH_TOKEN_SECRET
-                    : envKeys.ACCESS_TOKEN_SECRET;
+                    ? process.env.REFRESH_TOKEN_SECRET
+                    : process.env.ACCESS_TOKEN_SECRET;
 
             const payload = await this.jwtService.verifyAsync(token, {
                 secret: secretKey,
