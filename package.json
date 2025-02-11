@@ -30,6 +30,7 @@
         "test:genre:watch": "jest --watch --testPathPattern=src/genre --coverage --collectCoverageFrom=src/genre/**"
     },
     "dependencies": {
+        "@mapbox/node-pre-gyp": "^2.0.0",
         "@nestjs/cache-manager": "^3.0.0",
         "@nestjs/common": "^11.0.5",
         "@nestjs/config": "^4.0.0",
