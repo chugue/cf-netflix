@@ -59,6 +59,9 @@ import * as winston from 'winston';
                 database: configService.get<string>(envKeys.DB_DATABASE),
                 entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike],
                 synchronize: true,
+                ssl: {
+                    rejectUnauthorized: false,
+                },
             }),
         }),
         ServeStaticModule.forRoot({
