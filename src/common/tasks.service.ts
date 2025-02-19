@@ -5,9 +5,8 @@ import { readdir, unlink } from 'fs/promises';
 import { join, parse } from 'path';
 import { Movie } from 'src/movie/entity/movie.entity';
 import { Repository } from 'typeorm';
-import { Logger } from '@nestjs/common';
-import { DefaultLogger } from './logger/default.logger';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class TasksService {
@@ -57,9 +56,7 @@ export class TasksService {
 
         // 내부 함수 병렬처리후 완료되면 값 반환
         await Promise.all(
-            deleteFilesTargets.map((x) =>
-                unlink(join(process.cwd(), 'public', 'temp', x)),
-            ),
+            deleteFilesTargets.map((x) => unlink(join(process.cwd(), 'public', 'temp', x))),
         );
     }
 

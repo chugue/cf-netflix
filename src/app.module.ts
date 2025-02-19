@@ -46,6 +46,10 @@ import * as winston from 'winston';
                 HASH_ROUNDS: Joi.number().required(),
                 ACCESS_TOKEN_SECRET: Joi.string().required(),
                 REFRESH_TOKEN_SECRET: Joi.string().required(),
+                AWS_ACCESS_KEY_ID: Joi.string().required(),
+                AWS_SECRET_ACCESS_KEY: Joi.string().required(),
+                AWS_REGION: Joi.string().required(),
+                AWS_S3_BUCKET_NAME: Joi.string().required(),
             }),
         }),
         TypeOrmModule.forRootAsync({
@@ -58,10 +62,12 @@ import * as winston from 'winston';
                 password: configService.get<string>(envKeys.DB_PASSWORD),
                 database: configService.get<string>(envKeys.DB_DATABASE),
                 entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike],
-                synchronize: true,
-                ssl: {
-                    rejectUnauthorized: false,
-                },
+                synchronize: process.env.ENV === 'prod' ? false : true,
+                // ...(process.env.ENV === 'prod' && {
+                //     ssl: {
+                //         rejectUnauthorized: false,
+                //     },
+                // }),
             }),
         }),
         ServeStaticModule.forRoot({

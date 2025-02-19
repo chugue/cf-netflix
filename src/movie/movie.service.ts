@@ -393,10 +393,15 @@ export class MovieService {
 
     /* istanbul ignore next */
     async renameMovieFile(tempFolder: string, movieFolder: string, createMovieDto: CreateMovieDto) {
-        return await rename(
-            join(process.cwd(), tempFolder, createMovieDto.movieFileName),
-            join(process.cwd(), movieFolder, createMovieDto.movieFileName),
-        );
+        console.log(process.env.ENV);
+        if (process.env.ENV !== 'prod') {
+            return await rename(
+                join(process.cwd(), tempFolder, createMovieDto.movieFileName),
+                join(process.cwd(), movieFolder, createMovieDto.movieFileName),
+            );
+        } else {
+            return this.commonService.saveMovieToPermanentStorage(createMovieDto.movieFileName);
+        }
     }
 
     /* istanbul ignore next */
