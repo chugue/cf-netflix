@@ -177,10 +177,6 @@ export class MovieService {
 
             const { detail, directorId, genreIds, ...movieRest } = updateMovieDto;
 
-            console.log('Update DTO:', updateMovieDto); // 👈 디버깅용 로그 추가
-            console.log('Existing Movie:', movie); // 👈 디버깅용 로그 추가
-            console.log('Existing Movie Detail:', movie.detail); // 👈 디버깅용 로그 추가
-
             let newDirector: Director;
 
             if (directorId) {
