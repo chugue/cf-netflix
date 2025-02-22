@@ -3,7 +3,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { create } from 'domain';
-import { User } from './entities/user.entity';
+import { User } from './entity/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 const mockUserService = {
@@ -71,9 +71,7 @@ describe('UserController', () => {
                 },
             ];
 
-            jest.spyOn(userService, 'findAll').mockResolvedValue(
-                users as User[],
-            );
+            jest.spyOn(userService, 'findAll').mockResolvedValue(users as User[]);
             const result = await userController.findAll();
 
             expect(userService.findAll).toHaveBeenCalled();

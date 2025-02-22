@@ -12,6 +12,12 @@
             "options": {
                 "tabWidth": 2
             }
+        },
+        {
+            "files": ["*.ts", "*.js"],
+            "options": {
+                "tabWidth": 4
+            }
         }
     ]
 }

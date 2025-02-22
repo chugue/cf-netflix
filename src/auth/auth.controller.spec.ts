@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { User } from 'src/user/entities/user.entity';
+import { User } from 'src/user/entity/user.entity';
 
 const mockAuthService = {
     registerUser: jest.fn(),
@@ -44,9 +44,7 @@ describe('AuthController', () => {
                 email: 'test@codedfactory.ai',
             };
 
-            jest.spyOn(authService, 'registerUser').mockResolvedValue(
-                result as User,
-            );
+            jest.spyOn(authService, 'registerUser').mockResolvedValue(result as User);
             expect(authController.registerUser(token)).resolves.toEqual(result);
             expect(authService.registerUser).toHaveBeenCalledWith(token);
         });
@@ -78,9 +76,7 @@ describe('AuthController', () => {
     describe('rotateAccessToken', () => {
         it('should rotate access token', async () => {
             const accessToken = 'mocked.access.token';
-            jest.spyOn(authService, 'issueToken').mockResolvedValue(
-                accessToken,
-            );
+            jest.spyOn(authService, 'issueToken').mockResolvedValue(accessToken);
 
             const result = await authController.rotateAccessToken({
                 user: 'a',
@@ -109,16 +105,8 @@ describe('AuthController', () => {
             const result = await authController.loginUserWithPassport(req);
 
             expect(authService.issueToken).toHaveBeenCalledTimes(2);
-            expect(authService.issueToken).toHaveBeenNthCalledWith(
-                1,
-                user,
-                true,
-            );
-            expect(authService.issueToken).toHaveBeenNthCalledWith(
-                2,
-                user,
-                false,
-            );
+            expect(authService.issueToken).toHaveBeenNthCalledWith(1, user, true);
+            expect(authService.issueToken).toHaveBeenNthCalledWith(2, user, false);
             expect(result).toEqual({ refreshToken, accessToken });
         });
     });

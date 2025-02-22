@@ -69,7 +69,7 @@ jobs:
           cat test.env
 
           touch .env
-          echo "ENV=prod" >> .env
+          echo "ENV=$ENV" >> .env
           echo "DB_TYPE=$DB_TYPE" >> .env
           echo "DB_HOST=$DB_HOST" >> .env
           echo "DB_PORT=$DB_PORT" >> .env

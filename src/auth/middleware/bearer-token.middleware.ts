@@ -30,6 +30,11 @@ export class BearerTokenMiddleware implements NestMiddleware {
         }
         const token = this.validateBearerToken(authHeader);
 
+        if (!token) {
+            next();
+            return;
+        }
+
         const blockedToken = await this.cacheManager.get(`BLOCK_TOKEN_${token}`);
 
         if (blockedToken) {
@@ -92,6 +97,10 @@ export class BearerTokenMiddleware implements NestMiddleware {
         }
 
         const [bearer, token] = basicSplit;
+
+        if (bearer.toLocaleLowerCase() === 'basic') {
+            return null;
+        }
 
         if (bearer.toLocaleLowerCase() !== 'bearer') {
             throw new BadRequestException('토큰 포맷이 잘못되었습니다.');

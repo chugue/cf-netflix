@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GenreService } from './genre.service';
-import { Genre } from './entities/genre.entity';
+import { Genre } from './entity/genre.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConflictException, NotFoundException } from '@nestjs/common';
@@ -49,9 +49,7 @@ describe('GenreService', () => {
                 id: 1,
                 ...createGenreDto,
             };
-            jest.spyOn(repository, 'save').mockResolvedValue(
-                savedGenre as Genre,
-            );
+            jest.spyOn(repository, 'save').mockResolvedValue(savedGenre as Genre);
 
             const result = await service.create(createGenreDto);
             expect(repository.save).toHaveBeenCalledWith(createGenreDto);
@@ -66,18 +64,14 @@ describe('GenreService', () => {
                 id: 1,
                 ...createGenreDto,
             };
-            jest.spyOn(repository, 'findOne').mockResolvedValueOnce(
-                existingGenre as Genre,
-            );
+            jest.spyOn(repository, 'findOne').mockResolvedValueOnce(existingGenre as Genre);
             await expect(repository.findOne).toHaveBeenCalledWith({
                 where: {
                     name: createGenreDto.name,
                 },
             });
 
-            await expect(service.create(createGenreDto)).rejects.toThrow(
-                ConflictException,
-            );
+            await expect(service.create(createGenreDto)).rejects.toThrow(ConflictException);
         });
     });
 
@@ -117,9 +111,7 @@ describe('GenreService', () => {
         it('should throw a NotFoundException if genre is not found', async () => {
             jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
-            await expect(service.findOne(999)).rejects.toThrow(
-                NotFoundException,
-            );
+            await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
         });
     });
 
@@ -159,9 +151,9 @@ describe('GenreService', () => {
         it('should throw a NotFoundException if genre to update does not exist', async () => {
             jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
-            await expect(
-                service.update(999, { name: 'updated fantasy' }),
-            ).rejects.toThrow(NotFoundException);
+            await expect(service.update(999, { name: 'updated fantasy' })).rejects.toThrow(
+                NotFoundException,
+            );
         });
     });
 
