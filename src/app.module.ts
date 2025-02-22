@@ -63,11 +63,11 @@ import * as winston from 'winston';
                 database: configService.get<string>(envKeys.DB_DATABASE),
                 entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike],
                 synchronize: process.env.ENV === 'prod' ? false : true,
-                // ...(process.env.ENV === 'prod' && {
-                //     ssl: {
-                //         rejectUnauthorized: false,
-                //     },
-                // }),
+                ...(process.env.ENV === 'prod' && {
+                    ssl: {
+                        rejectUnauthorized: false,
+                    },
+                }),
             }),
         }),
         ServeStaticModule.forRoot({

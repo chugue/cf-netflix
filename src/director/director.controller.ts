@@ -37,10 +37,7 @@ export class DirectorController {
     }
 
     @Patch(':id')
-    update(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() updateDirectorDto: UpdateDirectorDto,
-    ) {
+    update(@Param('id', ParseIntPipe) id: number, @Body() updateDirectorDto: UpdateDirectorDto) {
         return this.directorService.update(+id, updateDirectorDto);
     }
 
