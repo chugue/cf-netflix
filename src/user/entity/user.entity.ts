@@ -7,9 +7,9 @@ import { Movie } from 'src/movie/entity/movie.entity';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Role {
-    ADMIN,
-    USER,
-    PAID_USER,
+    ADMIN = 0,
+    USER = 1,
+    PAID_USER = 2,
 }
 
 @Entity()

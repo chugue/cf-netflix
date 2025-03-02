@@ -1,0 +1,31 @@
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { catchError, finalize, Observable, tap } from 'rxjs';
+import { DataSource } from 'typeorm';
+
+@Injectable()
+export class WsTransactionInterceptor implements NestInterceptor {
+    constructor(private readonly dataSource: DataSource) {}
+
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+        const client = context.switchToWs().getClient();
+
+        const qr = this.dataSource.createQueryRunner();
+
+        await qr.connect();
+        await qr.startTransaction();
+
+        client.data.queryRunner = qr;
+
+        return next.handle().pipe(
+            tap(async () => {
+                await qr.commitTransaction();
+                await qr.release();
+            }),
+            catchError(async (e) => {
+                await qr.rollbackTransaction();
+                await qr.release();
+                throw e;
+            }),
+        );
+    }
+}

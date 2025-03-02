@@ -76,7 +76,19 @@ export class MovieController {
     getMovie(
         @Param('id', ParseIntPipe)
         id: number,
+        @Req() req: any,
     ) {
+        const session = req.session;
+
+        const movieCount = session.movieCount ?? {};
+
+        req.session.movieCount = {
+            ...movieCount,
+            [id]: movieCount[id] ? movieCount[id] + 1 : 1,
+        };
+
+        console.log(session);
+
         return this.movieService.findOne(id);
     }
 
