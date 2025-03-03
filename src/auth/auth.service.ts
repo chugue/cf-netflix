@@ -133,6 +133,8 @@ export class AuthService {
 
         const [email, password] = tokenSplit;
 
+        console.log(email, password);
+
         return { email, password };
     }
 

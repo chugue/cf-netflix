@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { envKeys } from 'src/common/const/env.const';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/common/prisma.service';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
     constructor(
@@ -70,13 +71,27 @@ export class UserService {
         if (!user) {
             throw new NotFoundException('User not found');
         }
-        const hash = await bcrypt.hash(
-            password,
-            this.configService.get<number>(envKeys.HASH_ROUNDS),
-        );
+
+        let input: Prisma.UserUpdateInput = {
+            ...updateUserDto,
+        };
+
+        if (password) {
+            const hash = await bcrypt.hash(password, process.env.HASH_ROUNDS);
+
+            input = {
+                ...input,
+                password: hash,
+            };
+        }
+
+        // const hash = await bcrypt.hash(
+        //     password,
+        //     this.configService.get<number>(envKeys.HASH_ROUNDS),
+        // );
         await this.prisma.user.update({
             where: { id },
-            data: { ...updateUserDto, password: hash },
+            data: input,
         });
         // await this.userRepository.update({ id }, { ...updateUserDto, password: hash });
         return this.prisma.user.findUnique({ where: { id } });

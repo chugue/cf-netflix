@@ -14,22 +14,6 @@ import { MovieUserLike } from './entity/movie-user-like.entity';
     imports: [
         TypeOrmModule.forFeature([Movie, MovieDetail, Director, Genre, MovieUserLike, User]),
         CommonModule,
-
-        // MulterModule.register({
-        //   storage: diskStorage({
-        //     // ......./NETFLIX/public/movie
-        //     destination: join(process.cwd(), 'public', 'movie'),
-        //     filename: (req, file, callback) => {
-        //       const split = file.originalname.split('.');
-        //       let extension = 'mp4';
-
-        //       if (split.length > 1) {
-        //         extension = split[split.length - 1];
-        //       }
-        //       callback(null, `${uuidv4()}_${Date.now()}.${extension}`);
-        //     },
-        //   }),
-        // }),
     ],
     controllers: [MovieController],
     providers: [MovieService],
