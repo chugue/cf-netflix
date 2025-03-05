@@ -16,6 +16,7 @@ import { MovieUserLike } from './entity/movie-user-like.entity';
         CommonModule,
     ],
     controllers: [MovieController],
+
     providers: [MovieService],
 })
 export class MovieModule {}

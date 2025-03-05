@@ -58,7 +58,7 @@ model MovieDetail {
     id       Int     @id @default(autoincrement())
     detail   String
     movie    Movie? 
-    movieId  Int
+    movieId  Int?
 }
 
 model Chat {
