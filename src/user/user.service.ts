@@ -9,104 +9,129 @@ import { envKeys } from 'src/common/const/env.const';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/common/prisma.service';
 import { Prisma } from '@prisma/client';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 @Injectable()
 export class UserService {
-    constructor(
-        private readonly configService: ConfigService,
-        private readonly prisma: PrismaService,
-    ) {}
+	constructor(
+		private readonly configService: ConfigService,
+		// private readonly prisma: PrismaService,
+		@InjectModel(User.name)
+		private readonly userModel: Model<User>,
+	) {}
 
-    async create(createUserDto: CreateUserDto) {
-        const { email, password } = createUserDto;
+	async create(createUserDto: CreateUserDto) {
+		const { email, password } = createUserDto;
 
-        const user = await this.prisma.user.findUnique({ where: { email } });
+		const user = await this.userModel.findOne({ email }).exec();
 
-        // const user = await this.userRepository.findOne({ where: { email } });
+		// const user = await this.prisma.user.findUnique({ where: { email } });
+		// const user = await this.userRepository.findOne({ where: { email } });
 
-        if (user) {
-            throw new BadRequestException('이미 존재하는 이메일입니다.');
-        }
+		if (user) {
+			throw new BadRequestException('이미 존재하는 이메일입니다.');
+		}
 
-        const hashedPassword = await bcrypt.hash(
-            password,
-            this.configService.get<number>(envKeys.HASH_ROUNDS),
-        );
+		const hashedPassword = await bcrypt.hash(password, this.configService.get<number>(envKeys.HASH_ROUNDS));
 
-        await this.prisma.user.create({
-            data: {
-                email,
-                password: hashedPassword,
-            },
-        });
+		// const newUser = new this.userModel({
+		// 	email,
+		// 	password: hashedPassword,
+		// });
 
-        // await this.userRepository.save({
-        //     email,
-        //     password: hashedPassword,
-        // });
+		// await this.userModel.create(newUser);
 
-        return this.prisma.user.findUnique({ where: { email } });
+		await this.userModel.create({
+			email,
+			password: hashedPassword,
+		});
 
-        // return this.userRepository.findOne({ where: { email } });
-    }
+		// await this.prisma.user.create({
+		// 	data: {
+		// 		email,
+		// 		password: hashedPassword,
+		// 	},
+		// });
 
-    findAll() {
-        return this.prisma.user.findMany();
-        // return this.userRepository.find();
-    }
+		// await this.userRepository.save({
+		//     email,
+		//     password: hashedPassword,
+		// });
 
-    async findOne(id: number) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        // const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-        return user;
-    }
+		return this.userModel.findOne({ email }).exec();
+		// return this.prisma.user.findUnique({ where: { email } });
+		// return this.userRepository.findOne({ where: { email } });
+	}
 
-    async update(id: number, updateUserDto: UpdateUserDto) {
-        const { password } = updateUserDto;
+	findAll() {
+		return this.userModel.find().exec();
+		// return this.prisma.user.findMany();
+		// return this.userRepository.find();
+	}
 
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        // const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
+	async findOne(id: number) {
+		const user = await this.userModel.findById(id).exec();
 
-        let input: Prisma.UserUpdateInput = {
-            ...updateUserDto,
-        };
+		// const user = await this.prisma.user.findUnique({ where: { id } });
+		// const user = await this.userRepository.findOne({ where: { id } });
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+		return user;
+	}
 
-        if (password) {
-            const hash = await bcrypt.hash(password, process.env.HASH_ROUNDS);
+	async update(id: number, updateUserDto: UpdateUserDto) {
+		const { password } = updateUserDto;
 
-            input = {
-                ...input,
-                password: hash,
-            };
-        }
+		const user = await this.userModel.findById(id).exec();
 
-        // const hash = await bcrypt.hash(
-        //     password,
-        //     this.configService.get<number>(envKeys.HASH_ROUNDS),
-        // );
-        await this.prisma.user.update({
-            where: { id },
-            data: input,
-        });
-        // await this.userRepository.update({ id }, { ...updateUserDto, password: hash });
-        return this.prisma.user.findUnique({ where: { id } });
-        // return this.userRepository.findOne({ where: { id } });
-    }
+		// const user = await this.prisma.user.findUnique({ where: { id } });
+		// const user = await this.userRepository.findOne({ where: { id } });
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
 
-    async remove(id: number) {
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        // const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
+		let input = {
+			...updateUserDto,
+		};
 
-        await this.prisma.user.delete({ where: { id } });
-        // await this.userRepository.delete({ id });
-        return id;
-    }
+		if (password) {
+			const hash = await bcrypt.hash(password, process.env.HASH_ROUNDS);
+
+			input = {
+				...input,
+				password: hash,
+			};
+		}
+
+		// const hash = await bcrypt.hash(
+		//     password,
+		//     this.configService.get<number>(envKeys.HASH_ROUNDS),
+		// );
+
+		await this.userModel.findByIdAndUpdate(id, input).exec();
+		// await this.prisma.user.update({
+		// 	where: { id },
+		// 	data: input,
+		// });
+		// await this.userRepository.update({ id }, { ...updateUserDto, password: hash });
+
+		return this.userModel.findById(id);
+		// return this.prisma.user.findUnique({ where: { id } });
+		// return this.userRepository.findOne({ where: { id } });
+	}
+
+	async remove(id: number) {
+		const user = await this.userModel.findById(id).exec();
+		// const user = await this.prisma.user.findUnique({ where: { id } });
+		// const user = await this.userRepository.findOne({ where: { id } });
+		if (!user) {
+			throw new NotFoundException('User not found');
+		}
+
+		await this.userModel.findByIdAndDelete(id).exec();
+		// await this.prisma.user.delete({ where: { id } });
+		// await this.userRepository.delete({ id });
+		return id;
+	}
 }
