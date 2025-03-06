@@ -33,140 +33,127 @@ import * as winston from 'winston';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
 import { WorkerModule } from './worker/worker.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
-            validationSchema: Joi.object({
-                ENV: Joi.string().valid('test', 'dev', 'prod').required(),
-                DB_TYPE: Joi.string().valid('postgres').required(),
-                DB_HOST: Joi.string().required(),
-                DB_PORT: Joi.number().required(),
-                DB_USERNAME: Joi.string().required(),
-                DB_PASSWORD: Joi.string().required(),
-                DB_DATABASE: Joi.string().required(),
-                HASH_ROUNDS: Joi.number().required(),
-                DB_URL: Joi.string().required(),
-                ACCESS_TOKEN_SECRET: Joi.string().required(),
-                REFRESH_TOKEN_SECRET: Joi.string().required(),
-                AWS_ACCESS_KEY_ID: Joi.string().required(),
-                AWS_SECRET_ACCESS_KEY: Joi.string().required(),
-                AWS_REGION: Joi.string().required(),
-                AWS_S3_BUCKET_NAME: Joi.string().required(),
-            }),
-        }),
-        TypeOrmModule.forRootAsync({
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService) => ({
-                url: configService.get<string>(envKeys.DB_URL),
-                type: configService.get<string>(envKeys.DB_TYPE) as 'postgres',
-                // host: configService.get<string>(envKeys.DB_HOST),
-                // port: configService.get<number>(envKeys.DB_PORT),
-                // username: configService.get<string>(envKeys.DB_USERNAME),
-                // password: configService.get<string>(envKeys.DB_PASSWORD),
-                // database: configService.get<string>(envKeys.DB_DATABASE),
-                entities: [
-                    Movie,
-                    MovieDetail,
-                    Director,
-                    Genre,
-                    User,
-                    MovieUserLike,
-                    Chat,
-                    ChatRoom,
-                ],
-                synchronize: process.env.ENV === 'prod' ? false : true,
-                ...(process.env.ENV === 'prod' && {
-                    ssl: {
-                        rejectUnauthorized: false,
-                    },
-                }),
-            }),
-        }),
-        ServeStaticModule.forRoot({
-            rootPath: join(process.cwd(), 'public'),
-            serveRoot: '/public/',
-        }),
-        MovieModule,
-        DirectorModule,
-        GenreModule,
-        AuthModule,
-        UserModule,
-        CommonModule,
-        CacheModule.register({
-            isGlobal: true,
-        }),
-        ScheduleModule.forRoot(),
-        WinstonModule.forRoot({
-            level: 'debug',
-            transports: [
-                new winston.transports.Console({
-                    format: winston.format.combine(
-                        winston.format.colorize({
-                            all: true,
-                        }),
-                        winston.format.timestamp(),
-                        winston.format.printf(
-                            (info) =>
-                                `${info.timestamp} -[${info.context}] - ${info.level} - ${info.message}`,
-                        ),
-                    ),
-                }),
-                new winston.transports.File({
-                    dirname: join(process.cwd(), 'logs'),
-                    filename: 'logs.log',
-                    format: winston.format.combine(
-                        winston.format.timestamp(),
-                        winston.format.printf(
-                            (info) =>
-                                `${info.timestamp} [${info.context}] ${info.level} - ${info.message}`,
-                        ),
-                    ),
-                }),
-            ],
-        }),
-        ChatModule,
-        ConditionalModule.registerWhen(WorkerModule, () => process.env.TYPE === 'worker'),
-    ],
-    providers: [
-        {
-            provide: APP_GUARD,
-            useClass: AuthGuard,
-        },
-        {
-            provide: APP_GUARD,
-            useClass: RBACGuard,
-        },
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: ResponseTimeInterceptor,
-        },
-        {
-            provide: APP_FILTER,
-            useClass: QueryFailedExceptionFilter,
-        },
-        {
-            provide: APP_INTERCEPTOR,
-            useClass: ThrottleInterceptor,
-        },
-    ],
+	imports: [
+		ConfigModule.forRoot({
+			isGlobal: true,
+			envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
+			validationSchema: Joi.object({
+				ENV: Joi.string().valid('test', 'dev', 'prod').required(),
+				DB_TYPE: Joi.string().valid('postgres').required(),
+				DB_HOST: Joi.string().required(),
+				DB_PORT: Joi.number().required(),
+				DB_USERNAME: Joi.string().required(),
+				DB_PASSWORD: Joi.string().required(),
+				DB_DATABASE: Joi.string().required(),
+				HASH_ROUNDS: Joi.number().required(),
+				DB_URL: Joi.string().required(),
+				ACCESS_TOKEN_SECRET: Joi.string().required(),
+				REFRESH_TOKEN_SECRET: Joi.string().required(),
+				AWS_ACCESS_KEY_ID: Joi.string().required(),
+				AWS_SECRET_ACCESS_KEY: Joi.string().required(),
+				AWS_REGION: Joi.string().required(),
+				AWS_S3_BUCKET_NAME: Joi.string().required(),
+			}),
+		}),
+		MongooseModule.forRoot(`mongodb+srv://test:test@nestjsmongo.zogis.mongodb.net/?retryWrites=true&w=majority&appName=NestJSMongo`),
+		TypeOrmModule.forRootAsync({
+			inject: [ConfigService],
+			useFactory: (configService: ConfigService) => ({
+				url: configService.get<string>(envKeys.DB_URL),
+				type: configService.get<string>(envKeys.DB_TYPE) as 'postgres',
+				// host: configService.get<string>(envKeys.DB_HOST),
+				// port: configService.get<number>(envKeys.DB_PORT),
+				// username: configService.get<string>(envKeys.DB_USERNAME),
+				// password: configService.get<string>(envKeys.DB_PASSWORD),
+				// database: configService.get<string>(envKeys.DB_DATABASE),
+				entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike, Chat, ChatRoom],
+				synchronize: process.env.ENV === 'prod' ? false : true,
+				...(process.env.ENV === 'prod' && {
+					ssl: {
+						rejectUnauthorized: false,
+					},
+				}),
+			}),
+		}),
+		ServeStaticModule.forRoot({
+			rootPath: join(process.cwd(), 'public'),
+			serveRoot: '/public/',
+		}),
+		MovieModule,
+		DirectorModule,
+		GenreModule,
+		AuthModule,
+		UserModule,
+		CommonModule,
+		CacheModule.register({
+			isGlobal: true,
+		}),
+		ScheduleModule.forRoot(),
+		WinstonModule.forRoot({
+			level: 'debug',
+			transports: [
+				new winston.transports.Console({
+					format: winston.format.combine(
+						winston.format.colorize({
+							all: true,
+						}),
+						winston.format.timestamp(),
+						winston.format.printf((info) => `${info.timestamp} -[${info.context}] - ${info.level} - ${info.message}`),
+					),
+				}),
+				new winston.transports.File({
+					dirname: join(process.cwd(), 'logs'),
+					filename: 'logs.log',
+					format: winston.format.combine(
+						winston.format.timestamp(),
+						winston.format.printf((info) => `${info.timestamp} [${info.context}] ${info.level} - ${info.message}`),
+					),
+				}),
+			],
+		}),
+		ChatModule,
+		ConditionalModule.registerWhen(WorkerModule, () => process.env.TYPE === 'worker'),
+	],
+	providers: [
+		{
+			provide: APP_GUARD,
+			useClass: AuthGuard,
+		},
+		{
+			provide: APP_GUARD,
+			useClass: RBACGuard,
+		},
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: ResponseTimeInterceptor,
+		},
+		{
+			provide: APP_FILTER,
+			useClass: QueryFailedExceptionFilter,
+		},
+		{
+			provide: APP_INTERCEPTOR,
+			useClass: ThrottleInterceptor,
+		},
+	],
 })
 export class AppModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer
-            .apply(BearerTokenMiddleware)
-            .exclude(
-                {
-                    path: 'auth/register',
-                    method: RequestMethod.POST,
-                },
-                {
-                    path: 'auth/login',
-                    method: RequestMethod.POST,
-                },
-            )
-            .forRoutes('*');
-    }
+	configure(consumer: MiddlewareConsumer) {
+		consumer
+			.apply(BearerTokenMiddleware)
+			.exclude(
+				{
+					path: 'auth/register',
+					method: RequestMethod.POST,
+				},
+				{
+					path: 'auth/login',
+					method: RequestMethod.POST,
+				},
+			)
+			.forRoutes('*');
+	}
 }

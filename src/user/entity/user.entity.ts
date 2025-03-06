@@ -7,42 +7,42 @@ import { Movie } from 'src/movie/entity/movie.entity';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 export enum Role {
-    ADMIN = 0,
-    USER = 1,
-    PAID_USER = 2,
+	ADMIN = 0,
+	USER = 1,
+	PAID_USER = 2,
 }
 
 @Entity()
 export class User extends BaseTable {
-    @PrimaryGeneratedColumn()
-    id: number;
+	@PrimaryGeneratedColumn()
+	id: number;
 
-    @Column({
-        unique: true,
-    })
-    email: string;
+	@Column({
+		unique: true,
+	})
+	email: string;
 
-    @Column()
-    @Exclude({
-        toPlainOnly: true,
-    })
-    password: string;
+	@Column()
+	@Exclude({
+		toPlainOnly: true,
+	})
+	password: string;
 
-    @Column({
-        enum: Role,
-        default: Role.USER,
-    })
-    role: Role;
+	@Column({
+		enum: Role,
+		default: Role.USER,
+	})
+	role: Role;
 
-    @OneToMany(() => Movie, (movie) => movie.creator)
-    createdMovies: Movie[];
+	@OneToMany(() => Movie, (movie) => movie.creator)
+	createdMovies: Movie[];
 
-    @OneToMany(() => MovieUserLike, (movieUserLike) => movieUserLike.user)
-    likedMovies: MovieUserLike[];
+	@OneToMany(() => MovieUserLike, (movieUserLike) => movieUserLike.user)
+	likedMovies: MovieUserLike[];
 
-    @OneToMany(() => Chat, (chat) => chat.author)
-    chats: Chat[];
+	@OneToMany(() => Chat, (chat) => chat.author)
+	chats: Chat[];
 
-    @ManyToMany(() => ChatRoom, (chatRoom) => chatRoom.users)
-    chatRooms: ChatRoom[];
+	@ManyToMany(() => ChatRoom, (chatRoom) => chatRoom.users)
+	chatRooms: ChatRoom[];
 }
