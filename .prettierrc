@@ -5,7 +5,7 @@
 	"singleQuote": true,
 	"trailingComma": "all",
 	"formatOnSave": true,
-	"printWidth": 2000,
+	"printWidth": 120,
 	"bracketSpacing": true,
 	"overrides": [
 		{

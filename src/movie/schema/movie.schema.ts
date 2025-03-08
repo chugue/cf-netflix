@@ -5,6 +5,7 @@ import { MovieDetail } from './movie-detail.schema';
 import { MovieUserLike } from './movie-user-like.schema';
 import { Genre } from 'src/genre/schema/genre.schema';
 import { Director } from 'src/director/schema/director.schema';
+import { Document } from 'mongoose';
 
 @Schema({
 	timestamps: true,

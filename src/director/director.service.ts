@@ -24,7 +24,7 @@ export class DirectorService {
 		// return this.directorRepository.find();
 	}
 
-	findOne(id: number) {
+	findOne(id: string) {
 		return this.directorModel.findById(id).exec();
 		// return this.prisma.director.findUnique({
 		//     where: { id },
@@ -40,7 +40,7 @@ export class DirectorService {
 		// return this.directorRepository.save(createDirectorDto);
 	}
 
-	async update(id: number, updateDirectorDto: UpdateDirectorDto) {
+	async update(id: string, updateDirectorDto: UpdateDirectorDto) {
 		const director = await this.directorModel.findById(id).exec();
 		// const director = await this.prisma.director.findUnique({
 		//     where: { id },
@@ -84,7 +84,7 @@ export class DirectorService {
 		return newDirector;
 	}
 
-	async remove(id: number) {
+	async remove(id: string) {
 		const director = await this.directorModel.findById(id).exec();
 		// const director = await this.prisma.director.findUnique({
 		//     where: { id },

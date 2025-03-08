@@ -1,17 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, ClassSerializerInterceptor, ParseIntPipe, Request, Req, UploadedFile, UploadedFiles, BadRequestException, Version } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Param,
+	Delete,
+	Query,
+	UseInterceptors,
+	ClassSerializerInterceptor,
+	ParseIntPipe,
+	Request,
+	Req,
+	UploadedFile,
+	UploadedFiles,
+	BadRequestException,
+	Version,
+} from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { RBAC } from 'src/auth/decorator/rbac.decorator';
 import { GetMoviesDto } from './dto/get-movies.dto';
-import { CacheInterceptor } from 'src/common/interceptor/cache.interceptor';
-import { TransactionInterceptor } from 'src/common/interceptor/transasction.interceptor';
-import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { MovieFilePipe } from './pipe/movie-file.pipe';
 import { UserId } from 'src/user/decorator/user-id.decorator';
-import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
-import { QueryRunner as QR } from 'typeorm';
 import { CacheKey, CacheTTL, CacheInterceptor as CI } from '@nestjs/cache-manager';
 import { Throttle } from 'src/common/decorator/throttle.decorator';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -19,7 +31,7 @@ import { Role } from '@prisma/client';
 
 @Controller('movie')
 @ApiBearerAuth()
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
 	constructor(private readonly movieService: MovieService) {}
 
@@ -55,8 +67,8 @@ export class MovieController {
 	@Get(':id')
 	@Public()
 	getMovie(
-		@Param('id', ParseIntPipe)
-		id: number,
+		@Param('id')
+		id: string,
 		@Req() req: any,
 	) {
 		const session = req.session;
@@ -86,13 +98,13 @@ export class MovieController {
 
 	@Patch(':id')
 	@RBAC(Role.ADMIN)
-	updateMovie(@Param('id', ParseIntPipe) id: number, @Body() reqDTO: UpdateMovieDto) {
+	updateMovie(@Param('id') id: string, @Body() reqDTO: UpdateMovieDto) {
 		return this.movieService.update(id, reqDTO);
 	}
 
 	@Delete(':id')
 	@RBAC(Role.ADMIN)
-	deleteMovie(@Param('id') id: number) {
+	deleteMovie(@Param('id') id: string) {
 		return this.movieService.remove(id);
 	}
 
@@ -122,12 +134,12 @@ export class MovieController {
 	 */
 
 	@Post(':id/like')
-	createMovieLike(@Param('id', ParseIntPipe) movieId: number, @UserId() userId: number) {
+	createMovieLike(@Param('id') movieId: string, @UserId() userId: string) {
 		return this.movieService.toggleMovieLike(movieId, userId, true);
 	}
 
 	@Post(':id/dislike')
-	createMovieDislike(@Param('id', ParseIntPipe) movieId: number, @UserId() userId: number) {
+	createMovieDislike(@Param('id') movieId: string, @UserId() userId: string) {
 		return this.movieService.toggleMovieLike(movieId, userId, false);
 	}
 }
